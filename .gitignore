@@ -1,0 +1,11 @@
+/.cache/
+/.lsp-session-v1
+/cache/
+/eln-cache/
+/elpa/
+/recentf
+/smilesmacs.el
+/straight/
+/eclipse.jdt.ls/
+/transient/
+/workspace/
