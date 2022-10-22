@@ -1113,6 +1113,13 @@ This is the package that handles server installation and session management.
     (add-hook 'java-mode-hook #'lsp)
     )
 
+#+end_src
+
+*** Gradle
+#+begin_src emacs-lisp
+
+
+
   (use-package gradle-mode
     :hook (java-mode . gradle-mode)
     :preface
@@ -1126,7 +1133,19 @@ This is the package that handles server installation and session management.
     (advice-add 'gradle-build :after #'my/switch-to-compilation-window)
     (advice-add 'gradle-test :after #'my/switch-to-compilation-window))
 #+end_src
+*** Maven
+#+begin_src emacs-lisp
 
+
+  ;; (require 'pom)
+  ;; (let ((pom (pom-read-pom)))
+  ;;   (jde-project-file-version "1.0")
+  ;;   (jde-set-variables
+  ;;    '(jde-javadoc-gen-destination-directory "./target/docs/apidocs")
+  ;;    '(jde-project-name (pom-get-project-id pom))
+  ;;    '(jde-global-classpath (pom-get-classpath pom))))
+
+#+end_src
 ** CSharp
 
 #+begin_src emacs-lisp
@@ -1642,6 +1661,112 @@ Finally, I use [[https://github.com/alex-hhh/emacs-sql-indent][sql-indent]] to b
     :hook (sql-mode . sqlind-minor-mode))
 #+end_src
 
+** Postgresql
+
+#+begin_src emacs-lisp
+
+
+
+
+
+
+;;; C files
+
+;; Style that matches the formatting used by
+;; src/tools/pgindent/pgindent.  Many extension projects also use this
+;; style.
+(c-add-style "postgresql"
+             '("bsd"
+               (c-auto-align-backslashes . nil)
+               (c-basic-offset . 4)
+               (c-offsets-alist . ((case-label . +)
+                                   (label . -)
+                                   (statement-case-open . +)))
+               (fill-column . 78)
+               (indent-tabs-mode . t)
+               (tab-width . 4)))
+
+(add-hook 'c-mode-hook
+          (defun postgresql-c-mode-hook ()
+            (when (string-match "/postgres\\(ql\\)?/" buffer-file-name)
+              (c-set-style "postgresql")
+              ;; Don't override the style we just set with the style in
+              ;; `dir-locals-file'.  Emacs 23.4.1 needs this; it is obsolete,
+              ;; albeit harmless, by Emacs 24.3.1.
+              (set (make-local-variable 'ignored-local-variables)
+                   (append '(c-file-style) ignored-local-variables)))))
+
+
+;;; Perl files
+
+;; Style that matches the formatting used by
+;; src/tools/pgindent/perltidyrc.
+(defun pgsql-perl-style ()
+  "Perl style adjusted for PostgreSQL project"
+  (interactive)
+  (setq perl-brace-imaginary-offset 0)
+  (setq perl-brace-offset 0)
+  (setq perl-continued-statement-offset 2)
+  (setq perl-continued-brace-offset (- perl-continued-statement-offset))
+  (setq perl-indent-level 4)
+  (setq perl-label-offset -2)
+  ;; Next two aren't marked safe-local-variable, so .dir-locals.el omits them.
+  (setq perl-indent-continued-arguments 4)
+  (setq perl-indent-parens-as-block t)
+  (setq indent-tabs-mode t)
+  (setq tab-width 4))
+
+(add-hook 'perl-mode-hook
+          (defun postgresql-perl-mode-hook ()
+             (when (string-match "/postgres\\(ql\\)?/" buffer-file-name)
+               (pgsql-perl-style))))
+
+
+
+
+
+
+
+
+
+;;; documentation files
+
+;; *.sgml files are actually XML
+(add-to-list 'auto-mode-alist '("/postgres\\(ql\\)?/.*\\.sgml\\'" . nxml-mode))
+
+(add-hook 'nxml-mode-hook
+          (defun postgresql-xml-mode-hook ()
+             (when (string-match "/postgres\\(ql\\)?/" buffer-file-name)
+               (setq fill-column 78)
+               (setq indent-tabs-mode nil))))
+
+;; The *.xsl files use 2-space indent, which is consistent with
+;; docbook-xsl sources and also the nxml-mode default.  But the *.sgml
+;; files use 1-space indent, mostly for historical reasons at this
+;; point.
+(add-hook 'nxml-mode-hook
+          (defun postgresql-xml-src-mode-hook ()
+             (when (string-match "/postgres\\(ql\\)?/.*\\.sgml\\'" buffer-file-name)
+               (setq nxml-child-indent 1))))
+
+
+;;; Makefiles
+
+;; use GNU make mode instead of plain make mode
+(add-to-list 'auto-mode-alist '("/postgres\\(ql\\)?/.*Makefile.*" . makefile-gmake-mode))
+(add-to-list 'auto-mode-alist '("/postgres\\(ql\\)?/.*\\.mk\\'" . makefile-gmake-mode))
+
+(use-package! sqlformat
+  ;; :load-path "~/doom.d/lisp/sqlformat"
+  :commands (sqlformat sqlformat-buffer sqlformat-region)
+  :hook (sql-mode . sqlformat-on-save-mode)
+  :init
+  (setq sqlformat-command 'pgformatter
+        sqlformat-args '("-s2" "-u1")))
+
+
+
+#+end_src>
 ** Style Sheet
 
 GNU Emacs already has built-in packages for style sheet languages (e.g., CSS,
