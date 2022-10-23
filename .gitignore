@@ -14,3 +14,4 @@
 /secret.el
 /org-roam.db
 /config.el
+org-clock-save.el
