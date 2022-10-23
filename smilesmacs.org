@@ -289,8 +289,6 @@ or if marked, the current region's, whole lines.
            ("M-n" . move-text-down))
     :config (move-text-default-bindings))
 #+end_src
-
-
 ** ANSII
 #+begin_src elisp
 
@@ -943,8 +941,6 @@ Let's install the main package for lsp. Here we will integrate lsp with which-ke
 #+end_src
 
 You can start LSP server in a java project by using ~C-c l s s~. Once you type ~C-c l~ ~which-key~ package should guide you through rest of the options. In above setting I have added some memory management settings as suggested in [[https://emacs-lsp.github.io/lsp-mode/page/performance/][this guide]]. Change them to higher numbers, if you find *lsp-mode* sluggish in your computer.
-
-
 * Programming Languages and Tools
 
 Section dedicated to the definition and customization of different programming
@@ -1161,8 +1157,6 @@ This is the package that handles server installation and session management.
   #+end_src
 
 ** Go --DBD
-
-
 ** Rust --DBD
 
 ** CSV
@@ -1519,7 +1513,7 @@ To make my UML diagrams with [[https://plantuml.com/][PlantUML]], I use [[https:
   (use-package plantuml-mode
     :mode ("\\.\\(plantuml\\|puml\\)\\'")
     :custom (plantuml-jar-path
-             (expand-file-name (format "%s/plantuml.jar" xdg-lib))))
+             (expand-file-name (format "%s/plantuml.jar" EMACS_DIR))))
   (setq org-plantuml-jar-path (expand-file-name "/home/i/.local/lib/plantuml.jar"))
 #+end_src
 
@@ -1844,8 +1838,6 @@ configuring the =browse-url= package.
     (browse-url-browser-function 'browse-url-generic)
     (browse-url-generic-program "qutebrowser"))
 #+end_src
-
-
 ** Calculator
 
 On a daily basis, you may have to make calculations or conversions from one unit
@@ -3174,9 +3166,6 @@ behavior.
     :delight
     :config (global-hungry-delete-mode))
 #+end_src
-
-
-
 * Emacs Client
 #+begin_src emacs-lisp
 (server-start)
@@ -3258,12 +3247,10 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
 Go through [[https://github.com/emacs-lsp/lsp-java#supported-commands][Supported commands]] section of lsp-java github page to see commands provided in lsp-mode. Most of these commands are available under lsp's ~C-c l~ option. I hope this configuration file was useful.
 
 
-* Org Mode
+* Org Mode --DBD
 [[https://orgmode.org/][Org Mode]] is one of my favorite modes in GNU Emacs. I mainly use it to write
 notes and manage my time to enjoy a better organization of my life, but you can
 do lots of things with it. It is like the sky, without limits.
-
-
 ** First Steps
 
 To use Org Mode, GNU Emacs already has the =org= built-in package. However, some
@@ -3507,4 +3494,270 @@ Finally, I use [[https://github.com/akhramov/org-wild-notifier.el][org-wild-noti
   ;;   (alert-default-style 'libnotify)
   ;;   (org-wild-notifier-notification-title "Agenda Reminder")
   ;;   :config (org-wild-notifier-mode))
+#+end_src
+** Bullets
+
+Let's add prettier bullets in Org Mode with [[https://github.com/sabof/org-bullets][org-bullets]].
+
+#+begin_src emacs-lisp
+  (use-package org-bullets
+    :hook (org-mode . org-bullets-mode)
+    :custom (org-bullets-bullet-list '("●" "►" "▸")))
+#+end_src
+
+** Capture
+
+=org-capture= templates saves you a lot of time when adding new entries. I use
+it to quickly record tasks, ledger entries, notes and other semi-structured
+information.
+
+#+begin_src emacs-lisp
+  (use-package org-capture
+    :ensure nil
+    :preface
+    (defvar my/org-active-task-template
+      (concat "* NEXT %^{Task}\n"
+              ":PROPERTIES:\n"
+              ":Effort: %^{effort|1:00|0:05|0:15|0:30|2:00|4:00}\n"
+              ":CAPTURED: %<%Y-%m-%d %H:%M>\n"
+              ":END:") "Template for basic task.")
+    (defvar my/org-appointment
+      (concat "* TODO %^{Appointment}\n"
+              "SCHEDULED: %t\n") "Template for appointment task.")
+    (defvar my/org-basic-task-template
+      (concat "* TODO %^{Task}\n"
+              ":PROPERTIES:\n"
+              ":Effort: %^{effort|1:00|0:05|0:15|0:30|2:00|4:00}\n"
+              ":CAPTURED: %<%Y-%m-%d %H:%M>\n"
+              ":END:") "Template for basic task.")
+    (defvar my/org-contacts-template
+      (concat "* %(org-contacts-template-name)\n"
+              ":PROPERTIES:\n"
+              ":BIRTHDAY: %^{YYYY-MM-DD}\n"
+              ":END:") "Template for a contact.")
+    :custom
+    (org-capture-templates
+     `(
+       ("c" "Contact" entry (file+headline "~/.personal/agenda/contacts.org" "Inbox"),
+        my/org-contacts-template
+        :empty-lines 1)
+
+       ("p" "People" entry (file+headline "~/.personal/agenda/people.org" "Tasks"),
+        my/org-basic-task-template
+        :empty-lines 1)
+       ("a" "Appointment" entry (file+headline "~/.personal/agenda/people.org" "Appointments"),
+        my/org-appointment
+        :empty-lines 1)
+       ("m" "Meeting" entry (file+headline "~/.personal/agenda/people.org" "Meetings")
+        "* Meeting with %? :meeting:\n%U" :clock-in t :clock-resume t :empty-lines 1)
+       ("P" "Phone Call" entry (file+headline "~/.personal/agenda/people.org" "Phone Calls")
+        "* Phone %? :phone:\n%U" :clock-in t :clock-resume t)
+
+       ("i" "New Item")
+       ("ib" "Book" checkitem (file+headline "~/.personal/items/books.org" "Books")
+        "- [ ] %^{Title} - %^{Author}\n  %U"
+        :immediate-finish t)
+       ("il" "Learning" checkitem (file+headline "~/.personal/items/learning.org" "Things")
+        "- [ ] %^{Thing}\n  %U"
+        :immediate-finish t)
+       ("im" "Movie" checkitem (file+headline "~/.personal/items/movies.org" "Movies")
+        "- [ ] %^{Title}\n  %U"
+        :immediate-finish t)
+       ("ip" "Purchase" checkitem (file+headline "~/.personal/items/purchases.org" "Purchases")
+        "- [ ] %^{Item}\n  %U"
+        :immediate-finish t)
+
+       ("t" "New Task")
+       ("ta" "Active" entry (file+headline "~/.personal/agenda/inbox.org" "Active"),
+        my/org-active-task-template
+        :empty-lines 1
+        :immediate-finish t)
+       ("tb" "Backlog" entry (file+headline "~/.personal/agenda/inbox.org" "Backlog"),
+        my/org-basic-task-template
+        :empty-lines 1
+        :immediate-finish t))))
+#+end_src
+** Clock
+
+To estimate and track the time of my tasks, GNU Emacs provides the =org-clock=
+built-in package.
+
+#+begin_src emacs-lisp
+  (use-package org-clock
+    :ensure nil
+    :after org
+    :preface
+    (defun my/org-mode-ask-effort ()
+      "Ask for an effort estimate when clocking in."
+      (unless (org-entry-get (point) "Effort")
+        (let ((effort
+               (completing-read
+                "Effort: "
+                (org-entry-get-multivalued-property (point) "Effort"))))
+          (unless (equal effort "")
+            (org-set-property "Effort" effort)))))
+    :hook (org-clock-in-prepare-hook . my/org-mode-ask-effort)
+    :custom
+    (org-clock-clocktable-default-properties
+     '(:block thisweek :maxlevel 2 :scope agenda :link t :compact t :formula %
+              :step week :fileskip0 t :stepskip0 t :narrow 50
+              :properties ("Effort" "CLOCKSUM" "TODO")))
+    (org-clock-continuously nil)
+    (org-clock-in-switch-to-state "STARTED")
+    (org-clock-out-remove-zero-time-clocks t)
+    (org-clock-persist t)
+    (org-clock-persist-file (expand-file-name (format "%s/org-clock-save.el" EMACS_DIR)))
+    (org-clock-persist-query-resume nil)
+    (org-clock-report-include-clocking-task t)
+    (org-show-notification-handler (lambda (msg) (alert msg))))
+#+end_src
+
+As a person with a short attention span, the [[https://francescocirillo.com/pages/pomodoro-technique][Pomodoro technique]] allows me to
+maximize my concentration throughout the day. Personally, I do sessions of 25
+minutes of concentrated work and 5 minutes of break. Finally, every two hours, I
+take a 30 minute break. To use the Pomodoro technique with GNU Emacs, the
+[[https://github.com/marcinkoziej/org-pomodoro][org-pomodoro]] package is suggested.
+
+#+begin_src emacs-lisp
+  (use-package org-pomodoro
+    :after org
+    :custom
+    (alert-user-configuration (quote ((((:category . "org-pomodoro")) libnotify nil))))
+    (org-pomodoro-audio-player "/usr/bin/mpv")
+    (org-pomodoro-finished-sound "~/audio/pomodoro_finished.mp3")
+    (org-pomodoro-format " %s")
+    (org-pomodoro-killed-sound "~/audio/pomodoro_killed.mp3")
+    (org-pomodoro-long-break-sound "~/audio/pomodoro_long.mp3")
+    (org-pomodoro-overtime-sound "~/audio/pomodoro_overtime.mp3")
+    (org-pomodoro-short-break-sound "~/audio/pomodoro_short.mp3")
+    (org-pomodoro-start-sound "~/audio/pomodoro_start.mp3")
+    (org-pomodoro-start-sound-p t))
+#+end_src
+
+** Contacts
+
+Managing your business and personal contact information can quickly turn into a
+mess. Several solutions exist in GNU Emacs. Personally I use the =org-contacts=
+package available in the =org-contrib= package.
+
+#+begin_src emacs-lisp
+  (use-package org-contacts
+    :after org
+    :ensure nil
+    :custom (org-contacts-files '("~/.personal/agenda/contacts.org")))
+#+end_src
+
+** Faces
+
+Let's change the foreground and the weight of each keyword.
+
+#+begin_src emacs-lisp
+  (use-package org-faces
+    :ensure nil
+    :custom
+    (org-todo-keyword-faces
+     '(("DONE"    . (:foreground "#8abeb7" :weight bold))
+       ("NEXT"    . (:foreground "#f0c674" :weight bold))
+       ("SOMEDAY" . (:foreground "#b294bb" :weight bold))
+       ("TODO"    . (:foreground "#b5bd68" :weight bold))
+       ("WAITING" . (:foreground "#de935f" :weight bold)))))
+#+end_src
+** Encryption / Decryption
+
+To encrypt and decrypt GPG files with =org-mode=, you need to add =org-crypt= in
+your =org-modules=, install =gnupg= with your system manager package and create a
+GPG key pair with the public key specified to =org-crypt=.
+
+#+begin_src emacs-lisp
+  (use-package org-crypt
+    :ensure nil
+    :init (org-crypt-use-before-save-magic)
+    :custom (org-crypt-key "E9AADC36E94A672D1A07D49B208FCDBB98190562"))
+
+  (setq epa-file-encrypt-to "terencio.agozzino@gmail.com")
+  (setq epa-file-select-keys "auto")
+#+end_src
+
+** Languages
+
+Let's specify languages extra to Org Mode to compile them directly into =.org=
+files.
+
+#+begin_src emacs-lisp
+  (use-package jupyter :ensure nil :after org)
+  (use-package python :ensure nil :after org)
+  (use-package ob-C :ensure nil :after org)
+  (use-package ob-css :ensure nil :after org)
+  (use-package ob-dot :ensure nil :after org)
+  (use-package ein)
+  (use-package ob-ein :ensure nil :after org)
+  (use-package ob-emacs-lisp :ensure nil :after org)
+  (use-package ob-gnuplot :ensure nil :after org)
+  (use-package ob-java :ensure nil :after org)
+  (use-package ob-js :ensure nil :after org)
+  (use-package ob-latex
+    :ensure nil
+    :after org
+    :custom (org-latex-compiler "xelatex"))
+  (use-package ob-ledger :ensure nil :after org)
+  (use-package ob-makefile :ensure nil :after org)
+  (use-package ob-org :ensure nil :after org)
+  (use-package ob-plantuml
+    :ensure nil
+    :after org
+    :custom (org-plantuml-jar-path (expand-file-name (format "%s/plantuml.jar" EMACS_DIR))))
+  (use-package ob-python :ensure nil :after org)
+  (use-package ob-shell :ensure nil :after org)
+  (use-package ob-sql :ensure nil :after org)
+#+end_src
+
+** Notes and Journal
+
+Taking notes is a necessity in a world full of information. To take these notes
+and interconnect them, the [[https://github.com/org-roam/org-roam][org-roam]] package is great.
+
+After using [[https://github.com/bastibe/org-journal][org-journal]], I also decided to use =org-roam= to write my journal.
+
+If you don't already do so, I advise you to start writing your journal. If you
+haven't done so yet, I suggest you start writing your journal. This journal
+would allow you, for example, to improve your mental clarity, follow your
+evolution, and facilitate your personal growth.
+
+#+begin_src emacs-lisp
+  (use-package org-roam
+    :after org
+    :init
+    (setq org-roam-v2-ack t)
+    (setq my/daily-note-filename "%<%Y-%m-%d>.org.gpg"
+          my/daily-note-header "#+title: %<%Y-%m-%d %a>\n\n[[roam:%<%Y-%B>]]\n\n")
+    :custom
+    (org-roam-capture-templates
+     '(("d" "default" plain "%?"
+        :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                           "#+title: ${title}\n")
+        :unnarrowed t)))
+    (org-roam-completion-everywhere t)
+    (org-roam-dailies-directory "journal/")
+    (org-roam-dailies-capture-templates
+     `(("d" "default" plain
+        "* %?"
+        :if-new (file+head ,my/daily-note-filename
+                           ,my/daily-note-header)
+        :empty-lines 1)
+
+       ("j" "journal" plain
+        "** %<%I:%M %p>  :journal:\n\n%?\n\n"
+        :if-new (file+head+olp ,my/daily-note-filename
+                               ,my/daily-note-header
+                               ("Journal"))
+        :empty-lines 1)
+       ("m" "meeting" entry
+        "** %<%I:%M %p> - %^{Meeting Title}  :meeting:\n\n%?\n\n"
+        :if-new (file+head+olp ,my/daily-note-filename
+                               ,my/daily-note-header
+                               ("Meetings"))
+        :empty-lines 1)))
+    (org-roam-directory "~/.personal/notes")
+    :custom (org-roam-graph-viewer "/usr/bin/qutebrowser")
+    :config (org-roam-setup))
 #+end_src
