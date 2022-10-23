@@ -1,4 +1,4 @@
-#+TITLE: Miles Emacs
+#+TITLE: Emacs by smilesT
 
 * Introduction
   This configuration file contains setup of Emacs packages for Language Server Protocol (LSP). I will use ~use-package~ for package management.
@@ -372,9 +372,9 @@ Finally, some saved files require a command to be run so that changes within the
       (make-directory (locate-user-emacs-file auto-save-folder))))
   :custom
   (auto-save-file-name-transforms
-   `((".*" ,(expand-file-name (format "%s/emacs/auto-save/" EMACS_DIR) t))))
+   `((".*" ,(expand-file-name (format "%s/emacs/auto-save/" xdg-cache) t))))
   (backup-directory-alist
-   `(("." . ,(expand-file-name (format "%s/emacs/backups/" EMACS_DIR)))))
+   `(("." . ,(expand-file-name (format "%s/emacs/backups/" xdg-data)))))
   (delete-old-versions t)
   (vc-make-backup-files t)
   (version-control t))

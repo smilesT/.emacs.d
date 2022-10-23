@@ -4,7 +4,7 @@
       gc-cons-percentage 0.6)
 
 ;; All the settings and package installation is set in configuration.org
-(org-babel-load-file "~/.emacs.d/smilesmacs.org")
+(org-babel-load-file "~/.emacs.d/config.org")
 
 (add-hook 'emacs-startup-hook
   (lambda ()
