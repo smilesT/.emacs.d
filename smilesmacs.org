@@ -1610,9 +1610,9 @@ To sort my Python imports, [[https://github.com/paetzke/py-isort.el][py-isort]] 
 install in your virtual environment or directly on your system.
 
 #+begin_src emacs-lisp
-  (use-package py-isort
-    :hook ((before-save . py-isort-before-save)
-           (python-mode . pyvenv-mode)))
+  ;; (use-package py-isort
+  ;;   :hook ((before-save . py-isort-before-save)
+  ;;          (python-mode . pyvenv-mode)))
 #+end_src
 
 I use a single virtual environment for all my Python projects. The combination
@@ -1622,7 +1622,7 @@ Python. A better behavior would be to define a function through a
 =kill-buffer-hook= that would call the =pyvenv-deactivate= command when all Python
 buffers are closed.
 
-** PyEnv --DBD
+*** PyEnv --DBD
 #+begin_src emacs-lisp
   ;; (use-package pyvenv
   ;;   :after python
