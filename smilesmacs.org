@@ -58,9 +58,9 @@ Here, I add some basic emacs setup like loading the language, disabling the tool
      user-full-name "Miles Strässle"                  ; Set the full name of the current user
      user-mail-address "straessle.miles@gmail.com"    ; Set the email address of the current user
      vc-follow-symlinks t                             ; Always follow the symlinks
-     view-read-only t                               ; Always open read-only buffers in view-mode
+     view-read-only t)                               ; Always open read-only buffers in view-mode
 
-  display-time-mode 1)
+  ;;display-time-mode 1)
 
     (column-number-mode 1)                            ; Show the column number
 
@@ -168,23 +168,34 @@ font installation.
    I tend to like *doom-themes* package. Below we will install doom theme. In addition, I will also install a package called *heaven-and-hell*. This allows us to toggle between two themes using a shortcut key. I will assign ~F6~ key to toggling the theme and ~C-c F6~ to set to default theme.
 
 #+BEGIN_SRC emacs-lisp
-      (use-package doom-themes
-      :ensure t
-      :init
-      (load-theme 'doom-tomorrow-night t)
-      (doom-themes-org-config))
+   (use-package doom-themes
+     :ensure t
+     :init
+     (load-theme 'doom-tomorrow-night t)
+     (doom-themes-org-config))
 
-      (use-package doom-modeline
-        :init (doom-modeline-mode)
-        :custom
-        (doom-modeline-icon (display-graphic-p)))
-    ;;    (doom-modeline-mu4e t))
+   (use-package doom-modeline
+     :init (doom-modeline-mode)
+     :custom
+     (doom-modeline-icon (display-graphic-p)))
+   ;;    (doom-modeline-mu4e t))
 
-  ;; (use-package nyan-mode)
-  ;; (setq mode-line-format
-  ;;       (list
-  ;;        '(:eval (list (nyan-create)))
-  ;;        ))
+
+
+   (use-package nyan-mode
+     :after doom-modeline
+     :config
+     (setq nyan-bar-length 15)
+     )
+  (setq nyan-mode 1)
+  (nyan-start-animation)
+
+   ;; (use-package nyan-mode
+   ;;   :ensure t)
+   ;; (setq mode-line-format
+   ;;       (list
+   ;;        '(:eval (list (nyan-create)))
+   ;;        ))
 #+END_SRC
 
 Since we do not do things by halves, it is also interesting to visually
