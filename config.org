@@ -34,6 +34,46 @@ In the following code block, we will initialize package repositories and after t
    (use-package use-package-ensure-system-package :ensure t)
 
  #+END_SRC
+** Backups
+
+It is important to have file backups available with GNU Emacs. It is rare when I have to go back into backups and when I do, it is to go back to a previous backup of a buffer.
+
+Finally, some saved files require a command to be run so that changes within the file are taken into account. The my/cmd-after-saved-file function below handles the command execution according to a file at each save of this file.
+#+begin_src emacs-lisp
+
+
+(use-package files
+  :ensure nil
+  :preface
+  (defvar afilename-cmd
+    `((,(format "%s/X11/Xresources" xdg-config) . ,(format "xrdb -merge %s/X11/Xresources" xdg-config))
+      (,(format "%s/xbindkeysrc" (getenv "HOME")) . "xbindkeys -p"))
+    "File association list with their respective command.")
+
+  (defun my/cmd-after-saved-file ()
+    "Execute a command after saved a specific file."
+    (let* ((match (assoc (buffer-file-name) afilename-cmd)))
+      (when match
+        (shell-command (cdr match)))))
+  :hook (after-save . my/cmd-after-saved-file)
+  :init
+  ;; Create the "~/.cache/emacs/auto-save" folder if it does not exist.
+  (let ((auto-save-folder (expand-file-name
+                           (file-name-as-directory
+                            (expand-file-name (format "%s/emacs/auto-save/" xdg-cache))))))
+    (unless (file-exists-p (locate-user-emacs-file auto-save-folder))
+      (make-directory (locate-user-emacs-file auto-save-folder))))
+  :custom
+  (auto-save-file-name-transforms
+   `((".*" ,(expand-file-name (format "%s/emacs/auto-save/" xdg-cache) t))))
+  (backup-directory-alist
+   `(("." . ,(expand-file-name (format "%s/emacs/backups/" xdg-data)))))
+  (delete-old-versions t)
+  (vc-make-backup-files t)
+  (version-control t))
+
+#+end_src>
+
 ** Basic setup
 Here, I add some basic emacs setup like loading the language, disabling the toolbar, setting up backup directory etc. I have added comments to each setting.
 
@@ -289,97 +329,6 @@ or if marked, the current region's, whole lines.
            ("M-n" . move-text-down))
     :config (move-text-default-bindings))
 #+end_src
-** Saving Configuration
-
-A good practice is to use an .org file to modify your GNU Emacs configuration with org-mode and to load this configuration via an .el file. This way you can maintain an org-mode configuration and still get a faster load.
-
-Using the async package and the org-babel-tangle command, the code below will executes org-babel-tangle asynchronously when config.org is saved, to update the config.el file. From then on, you only need to add a add the my/config-tangle function to the after-save hook and specify the loading of the config.el file into the init.el file.
-#+begin_src emacs-lisp
-
-
-(use-package async
-  :after org
-  :preface
-  (defvar config-file (expand-file-name "config.org" user-emacs-directory)
-    "The configuration file.")
-
-  (defvar config-last-change (nth 5 (file-attributes config-file))
-    "The last modification time of the configuration file.")
-
-  (defvar show-async-tangle-results nil
-    "Keep *emacs* async buffers around for later inspection.")
-
-  (defun my/config-tangle ()
-    "Tangle the org file asynchronously."
-    (when (my/config-updated)
-      (setq config-last-change
-            (nth 5 (file-attributes config-file)))
-      (my/async-babel-tangle config-file)))
-
-  (defun my/config-updated ()
-    "Check if the configuration file has been updated since the last time."
-    (time-less-p config-last-change
-                 (nth 5 (file-attributes config-file))))
-
-  (defun my/async-babel-tangle (org-file)
-    "Tangle the org file asynchronously."
-    (let ((init-tangle-start-time (current-time))
-          (file (buffer-file-name))
-          (async-quiet-switch "-q"))
-      (async-start
-       `(lambda ()
-          (require 'org)
-
-          (org-babel-tangle-file ,org-file))
-       (unless show-async-tangle-results
-         `(lambda (result)
-            (if result
-                (message "[✓] %s successfully tangled (%.2fs)"
-                         ,org-file
-                         (float-time (time-subtract (current-time)
-                                                    ',init-tangle-start-time)))
-              (message "[✗] %s as tangle failed." ,org-file))))))))
-
-#+end_src>
-** Backups
-
-It is important to have file backups available with GNU Emacs. It is rare when I have to go back into backups and when I do, it is to go back to a previous backup of a buffer.
-
-Finally, some saved files require a command to be run so that changes within the file are taken into account. The my/cmd-after-saved-file function below handles the command execution according to a file at each save of this file.
-#+begin_src emacs-lisp
-
-
-(use-package files
-  :ensure nil
-  :preface
-  (defvar afilename-cmd
-    `((,(format "%s/X11/Xresources" xdg-config) . ,(format "xrdb -merge %s/X11/Xresources" xdg-config))
-      (,(format "%s/xbindkeysrc" (getenv "HOME")) . "xbindkeys -p"))
-    "File association list with their respective command.")
-
-  (defun my/cmd-after-saved-file ()
-    "Execute a command after saved a specific file."
-    (let* ((match (assoc (buffer-file-name) afilename-cmd)))
-      (when match
-        (shell-command (cdr match)))))
-  :hook (after-save . my/cmd-after-saved-file)
-  :init
-  ;; Create the "~/.cache/emacs/auto-save" folder if it does not exist.
-  (let ((auto-save-folder (expand-file-name
-                           (file-name-as-directory
-                            (expand-file-name (format "%s/emacs/auto-save/" xdg-cache))))))
-    (unless (file-exists-p (locate-user-emacs-file auto-save-folder))
-      (make-directory (locate-user-emacs-file auto-save-folder))))
-  :custom
-  (auto-save-file-name-transforms
-   `((".*" ,(expand-file-name (format "%s/emacs/auto-save/" xdg-cache) t))))
-  (backup-directory-alist
-   `(("." . ,(expand-file-name (format "%s/emacs/backups/" xdg-data)))))
-  (delete-old-versions t)
-  (vc-make-backup-files t)
-  (version-control t))
-
-#+end_src>
 
 ** ANSII
 #+begin_src elisp
@@ -489,10 +438,10 @@ Finally, to manage folders with a large number of files, it may be useful to
 filter with [[https://github.com/Fuco1/dired-hacks/blob/master/dired-narrow.el][dired-narrow]]
 
 #+begin_src emacs-lisp
-  (use-package dired-narrow
-    :ensure nil
-    :bind (("C-c C-n" . dired-narrow)
-           ("C-c C-f" . dired-narrow-fuzzy)))
+  ;; (use-package dired-narrow
+  ;;   :ensure nil
+  ;;   :bind (("C-c C-n" . dired-narrow)
+  ;;          ("C-c C-f" . dired-narrow-fuzzy)))
 #+end_src
 
 ** Windows
