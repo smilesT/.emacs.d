@@ -36,82 +36,84 @@ In the following code block, we will initialize package repositories and after t
 Here, I add some basic emacs setup like loading the language, disabling the toolbar, setting up backup directory etc. I have added comments to each setting.
 
 #+BEGIN_SRC emacs-lisp
-  ;; Disable annoying ring-bell when backspace key is pressed in certain situations
+    ;; Disable annoying ring-bell when backspace key is pressed in certain situations
 
-    (setq-default
-   ad-redefinition-action 'accept                   ; Silence warnings for redefinition
-   cursor-in-non-selected-windows t                 ; Hide the cursor in inactive windows
-   display-time-default-load-average nil            ; Don't display load average
-   fill-column 80                                   ; Set width for automatic line breaks
-   help-window-select t                             ; Focus new help windows when opened
-   indent-tabs-mode nil                             ; Prefer spaces over tabs
-   inhibit-startup-screen t                         ; Disable start-up screen
-   initial-scratch-message ""                       ; Empty the initial *scratch* buffer
-   kill-ring-max 128                                ; Maximum length of kill ring
-   load-prefer-newer t                              ; Prefer the newest version of a file
-   mark-ring-max 128                                ; Maximum length of mark ring
-   read-process-output-max (* 1024 1024)            ; Increase the amount of data reads from the process
-   scroll-conservatively most-positive-fixnum       ; Always scroll by one line
-   select-enable-clipboard t                        ; Merge system's and Emacs' clipboard
-   tab-width 4                                      ; Set width for tabs
-   use-package-always-ensure t                      ; Avoid the :ensure keyword for each package
-   user-full-name "Miles Strässle"                  ; Set the full name of the current user
-   user-mail-address "straessle.miles@gmail.com"    ; Set the email address of the current user
-   vc-follow-symlinks t                             ; Always follow the symlinks
-   view-read-only t)                                ; Always open read-only buffers in view-mode
+      (setq-default
+     ad-redefinition-action 'accept                   ; Silence warnings for redefinition
+     cursor-in-non-selected-windows t                 ; Hide the cursor in inactive windows
+     display-time-default-load-average nil            ; Don't display load average
+     fill-column 80                                   ; Set width for automatic line breaks
+     help-window-select t                             ; Focus new help windows when opened
+     indent-tabs-mode nil                             ; Prefer spaces over tabs
+     inhibit-startup-screen t                         ; Disable start-up screen
+     initial-scratch-message ""                       ; Empty the initial *scratch* buffer
+     kill-ring-max 128                                ; Maximum length of kill ring
+     load-prefer-newer t                              ; Prefer the newest version of a file
+     mark-ring-max 128                                ; Maximum length of mark ring
+     read-process-output-max (* 1024 1024)            ; Increase the amount of data reads from the process
+     scroll-conservatively most-positive-fixnum       ; Always scroll by one line
+     select-enable-clipboard t                        ; Merge system's and Emacs' clipboard
+     tab-width 4                                      ; Set width for tabs
+     use-package-always-ensure t                      ; Avoid the :ensure keyword for each package
+     user-full-name "Miles Strässle"                  ; Set the full name of the current user
+     user-mail-address "straessle.miles@gmail.com"    ; Set the email address of the current user
+     vc-follow-symlinks t                             ; Always follow the symlinks
+     view-read-only t                               ; Always open read-only buffers in view-mode
 
-  (column-number-mode 1)                            ; Show the column number
+  display-time-mode 1)
 
-  (fset 'yes-or-no-p 'y-or-n-p)                     ; Replace yes/no prompts with y/n
-  (global-hl-line-mode)                             ; Hightlight current line
-  (set-default-coding-systems 'utf-8)               ; Default to utf-8 encoding
-  (show-paren-mode 1)                               ; Show the parent
+    (column-number-mode 1)                            ; Show the column number
 
-  (setq ring-bell-function 'ignore)
+    (fset 'yes-or-no-p 'y-or-n-p)                     ; Replace yes/no prompts with y/n
+    (global-hl-line-mode)                             ; Hightlight current line
+    (set-default-coding-systems 'utf-8)               ; Default to utf-8 encoding
+    (show-paren-mode 1)                               ; Show the parent
 
-  ;; Disable scrollbar and toolbar
-  (scroll-bar-mode -1)
-  (tool-bar-mode -1)
+    (setq ring-bell-function 'ignore)
 
-  ;; Set language environment to UTF-8
-  (set-language-environment "UTF-8")
-  (set-default-coding-systems 'utf-8)
+    ;; Disable scrollbar and toolbar
+    (scroll-bar-mode -1)
+    (tool-bar-mode -1)
 
-  ;; Longer whitespace, otherwise syntax highlighting is limited to default column
-  (setq whitespace-line-column 1000)
+    ;; Set language environment to UTF-8
+    (set-language-environment "UTF-8")
+    (set-default-coding-systems 'utf-8)
 
-  ;; Enable soft-wrap
-  (global-visual-line-mode 1)
+    ;; Longer whitespace, otherwise syntax highlighting is limited to default column
+    (setq whitespace-line-column 1000)
 
-  ;; Maintain a list of recent files opened
-  (recentf-mode 1)
-  (setq recentf-max-saved-items 50)
+    ;; Enable soft-wrap
+    (global-visual-line-mode 1)
 
-  ;; Move all the backup files to specific cache directory
-  ;; This way you won't have annoying temporary files starting with ~(tilde) in each directory
-  ;; Following setting will move temporary files to specific folders inside cache directory in EMACS_DIR
+    ;; Maintain a list of recent files opened
+    (recentf-mode 1)
+    (setq recentf-max-saved-items 50)
 
-  (setq user-cache-directory (concat EMACS_DIR "cache"))
-  (setq backup-directory-alist `(("." . ,(expand-file-name "backups" user-cache-directory)))
-        url-history-file (expand-file-name "url/history" user-cache-directory)
-        auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-" user-cache-directory)
-        projectile-known-projects-file (expand-file-name "projectile-bookmarks.eld" user-cache-directory))
+    ;; Move all the backup files to specific cache directory
+    ;; This way you won't have annoying temporary files starting with ~(tilde) in each directory
+    ;; Following setting will move temporary files to specific folders inside cache directory in EMACS_DIR
 
-  ;; Org-mode issue with src block not expanding
-  ;; This is a fix for bug in org-mode where <s TAB does not expand SRC block
-  ;; (when (version<= "9.2" (org-version))
-  ;; (require 'org-tempo))
+    (setq user-cache-directory (concat EMACS_DIR "cache"))
+    (setq backup-directory-alist `(("." . ,(expand-file-name "backups" user-cache-directory)))
+          url-history-file (expand-file-name "url/history" user-cache-directory)
+          auto-save-list-file-prefix (expand-file-name "auto-save-list/.saves-" user-cache-directory)
+          projectile-known-projects-file (expand-file-name "projectile-bookmarks.eld" user-cache-directory))
 
-  ;; Coding specific setting
+    ;; Org-mode issue with src block not expanding
+    ;; This is a fix for bug in org-mode where <s TAB does not expand SRC block
+    ;; (when (version<= "9.2" (org-version))
+    ;; (require 'org-tempo))
 
-  ;; Automatically add ending brackets and braces
-  (electric-pair-mode 1)
+    ;; Coding specific setting
 
-  ;; Make sure tab-width is 4 and not 8
-  (setq-default tab-width 4)
+    ;; Automatically add ending brackets and braces
+    (electric-pair-mode 1)
 
-  ;; Highlight matching brackets and braces
-  (show-paren-mode 1)
+    ;; Make sure tab-width is 4 and not 8
+    (setq-default tab-width 4)
+
+    ;; Highlight matching brackets and braces
+    (show-paren-mode 1)
 #+END_SRC
 
 ** Line Numbers --DBD Relative / Collapses
@@ -957,6 +959,16 @@ Section dedicated to the definition and customization of different programming
 languages and their tools. If you have the need to specify other programming
 languages, please check out the [[https://emacs-lsp.github.io/lsp-mode/page/languages/][languages section]] of the LSP mode website.
 
+** Assembly
+#+begin_src emacs-lisp
+(defun my-asm-mode-hook ()
+  ;; you can use `comment-dwim' (M-;) for this kind of behaviour anyway
+  (local-unset-key (vector asm-comment-char))
+  ;; asm-mode sets it locally to nil, to "stay closer to the old TAB behaviour".
+  (setq tab-always-indent (default-value 'tab-always-indent)))
+
+(add-hook 'asm-mode-hook #'my-asm-mode-hook)
+#+end_src
 ** Bash
 
 Being a UNIX user, I often do Bash. Since GNU Emacs already supports it, I only
@@ -1160,8 +1172,6 @@ This is the package that handles server installation and session management.
   #+end_src
 
 #+RESULTS:
-
-
 ** Go
 
 ** Rust
@@ -1665,11 +1675,6 @@ Finally, I use [[https://github.com/alex-hhh/emacs-sql-indent][sql-indent]] to b
 
 #+begin_src emacs-lisp
 
-
-
-
-
-
 ;;; C files
 
 ;; Style that matches the formatting used by
@@ -1721,15 +1726,7 @@ Finally, I use [[https://github.com/alex-hhh/emacs-sql-indent][sql-indent]] to b
              (when (string-match "/postgres\\(ql\\)?/" buffer-file-name)
                (pgsql-perl-style))))
 
-
-
-
-
-
-
-
-
-;;; documentation files
+;; documentation files
 
 ;; *.sgml files are actually XML
 (add-to-list 'auto-mode-alist '("/postgres\\(ql\\)?/.*\\.sgml\\'" . nxml-mode))
@@ -1858,6 +1855,33 @@ configuring the =browse-url= package.
     (browse-url-browser-function 'browse-url-generic)
     (browse-url-generic-program "qutebrowser"))
 #+end_src
+
+
+** Battery
+
+#+begin_src emacs-lisp
+
+(require 'battery)
+(when (and battery-status-function
+           (not (string-match-p "N/A"
+                                (battery-format "%B"
+                                                (funcall battery-status-function)))))
+  (display-battery-mode 1))
+
+
+
+
+
+
+
+
+
+
+; (unless (equal "Battery status not available"
+;                (battery))
+;x   (display-battery-mode 1))
+#+end_src>
+
 
 ** Calculator
 
