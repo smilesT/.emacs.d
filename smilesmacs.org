@@ -10,24 +10,25 @@
 In the following code block, we will initialize package repositories and after that install ~use-package~. This package is used to install other packages.
 
  #+BEGIN_SRC emacs-lisp
+   ;; Private Variables
+   (org-babel-load-file "~/.emacs.d/secret.el")
 
-   (setq EMACS_DIR "~/.emacs.d/")
-    (require 'package)
+   (require 'package)
 
-    (setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                             ("elpa" . "https://elpa.gnu.org/packages/")
-                             ("nongnu" . "https://elpa.nongnu.org/nongnu/")
-                             ("org" . "https://orgmode.org/elpa/")))
+   (setq package-archives '(("melpa" . "https://melpa.org/packages/")
+                            ("elpa" . "https://elpa.gnu.org/packages/")
+                            ("nongnu" . "https://elpa.nongnu.org/nongnu/")
+                            ("org" . "https://orgmode.org/elpa/")))
 
    (package-initialize)
 
-    ; Fetch the list of packages available
-    (unless package-archive-contents (package-refresh-contents))
+                                           ; Fetch the list of packages available
+   (unless package-archive-contents (package-refresh-contents))
 
-    ; Install use-package
-    (setq package-list '(use-package))
-    (dolist (package package-list)
-    (unless (package-installed-p package) (package-install package)))
+                                           ; Install use-package
+   (setq package-list '(use-package))
+   (dolist (package package-list)
+     (unless (package-installed-p package) (package-install package)))
 
    (use-package delight :ensure t)
    (use-package use-package-ensure-system-package :ensure t)
@@ -55,8 +56,6 @@ Here, I add some basic emacs setup like loading the language, disabling the tool
    select-enable-clipboard t                        ; Merge system's and Emacs' clipboard
    tab-width 4                                      ; Set width for tabs
    use-package-always-ensure t                      ; Avoid the :ensure keyword for each package
-   user-full-name "Miles Strässle"                  ; Set the full name of the current user
-   user-mail-address "straessle.miles@gmail.com"    ; Set the email address of the current user
    vc-follow-symlinks t                             ; Always follow the symlinks
    view-read-only t)                               ; Always open read-only buffers in view-mode
 
@@ -1109,7 +1108,7 @@ This is the package that handles server installation and session management.
           lsp-java-format-enabled nil
 
           ;; Error if not defined and multiple javac available
-          lsp-java-java-path "/usr/lib/jvm/java-openjdk/bin/java"
+          lsp-java-java-path JAVA_HOME
           )
     :config
     (add-hook 'java-mode-hook #'lsp)
@@ -1161,10 +1160,10 @@ This is the package that handles server installation and session management.
   :ensure t)
   #+end_src
 
-#+RESULTS:
-** Go
+** Go --DBD
 
-** Rust
+
+** Rust --DBD
 
 ** CSV
 
@@ -1743,7 +1742,7 @@ Finally, I use [[https://github.com/alex-hhh/emacs-sql-indent][sql-indent]] to b
 (add-to-list 'auto-mode-alist '("/postgres\\(ql\\)?/.*Makefile.*" . makefile-gmake-mode))
 (add-to-list 'auto-mode-alist '("/postgres\\(ql\\)?/.*\\.mk\\'" . makefile-gmake-mode))
 
-(use-package! sqlformat
+(use-package sqlformat
   ;; :load-path "~/doom.d/lisp/sqlformat"
   :commands (sqlformat sqlformat-buffer sqlformat-region)
   :hook (sql-mode . sqlformat-on-save-mode)
@@ -3306,7 +3305,6 @@ install it.
            (auto-save . org-save-all-org-buffers)
            (org-mode . visual-line-mode))
     :custom
-    (org-archive-location "~/.personal/archives/%s::")
     (org-blank-before-new-entry '((heading . t)
                                   (plain-list-item . t)))
     (org-confirm-babel-evaluate nil)
@@ -3323,9 +3321,9 @@ install it.
                    org-tempo))
     (org-refile-allow-creating-parent-nodes 'confirm)
     (org-refile-targets '((org-agenda-files :maxlevel . 1)
-                          ("~/.personal/agenda/home.org" :maxlevel . 2)
-                          ("~/.personal/agenda/3semOst.org" :maxlevel . 2)
-                          ("~/.personal/agenda/work.org" :maxlevel . 2)))
+                          (AGENDA_HOME  :maxlevel . 2)
+                          (AGENDA_SCHOOL :maxlevel . 2)
+                          (AGENDA_WORK :maxlevel . 2)))
     (org-refile-use-cache nil)
     (org-refile-use-outline-path nil)
     (org-startup-indented t)
@@ -3423,11 +3421,11 @@ smartphone or other laptop), I synchronize my =.org= files with [[https://github
   (use-package org-agenda
     :ensure nil
     :bind (:map org-agenda-mode-map
-                ("C-n" . org-agenda-next-item)
-                ("C-p" . org-agenda-previous-item)
-                ("j" . org-agenda-goto)
-                ("X" . my/org-agenda-mark-done-next)
-                ("x" . my/org-agenda-mark-done))
+		("C-n" . org-agenda-next-item)
+		("C-p" . org-agenda-previous-item)
+		("j" . org-agenda-goto)
+		("X" . my/org-agenda-mark-done-next)
+		("x" . my/org-agenda-mark-done))
     :preface
     (defun my/org-agenda-mark-done (&optional arg)
       "Mark the current TODO as done in org-agenda."
@@ -3451,15 +3449,15 @@ smartphone or other laptop), I synchronize my =.org= files with [[https://github
        ))
     (org-agenda-custom-commands
      '(("d" "Dashboard"
-        ((agenda "" ((org-deadline-warning-days 7)))
-         (todo "NEXT"
-               ((org-agenda-overriding-header "Next Tasks")))
-         (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
+	((agenda "" ((org-deadline-warning-days 7)))
+	 (todo "NEXT"
+	       ((org-agenda-overriding-header "Next Tasks")))
+	 (tags-todo "agenda/ACTIVE" ((org-agenda-overriding-header "Active Projects")))))
 
        ("n" "Next Tasks"
-        ((agenda "" ((org-deadline-warning-days 7)))
-         (todo "NEXT"
-               ((org-agenda-overriding-header "Next Tasks")))))
+	((agenda "" ((org-deadline-warning-days 7)))
+	 (todo "NEXT"
+	       ((org-agenda-overriding-header "Next Tasks")))))
 
        ("h" "Home Tasks" tags-todo "@home")
        ("w" "Work Tasks" tags-todo "@work")
@@ -3468,9 +3466,9 @@ smartphone or other laptop), I synchronize my =.org= files with [[https://github
        ("C" "Challenging Tasks" tags-todo "challenging")
 
        ("e" tags-todo "+TODO=\"NEXT\"+Effort<15&+Effort>0"
-        ((org-agenda-overriding-header "Low Effort Tasks")
-         (org-agenda-max-todos 20)
-         (org-agenda-files org-agenda-files)))))
+	((org-agenda-overriding-header "Low Effort Tasks")
+	 (org-agenda-max-todos 20)
+	 (org-agenda-files org-agenda-files)))))
     (org-agenda-dim-blocked-tasks t)
     (org-agenda-files '("~/.personal/agenda"))
     (org-agenda-inhibit-startup t)
@@ -3486,8 +3484,8 @@ smartphone or other laptop), I synchronize my =.org= files with [[https://github
     (org-agenda-time-grid '((daily today require-timed)))
     (org-agenda-use-tag-inheritance t)
     (org-columns-default-format "%14SCHEDULED %Effort{:} %1PRIORITY %TODO %50ITEM %TAGS")
-    (org-default-notes-file "~/.personal/agenda/inbox.org")
-    (org-directory "~/.personal")
+    (org-default-notes-file ORG_NOTES)
+    (org-directory ORG_DIR)
     (org-enforce-todo-dependencies t)
     (org-habit-completed-glyph ?✓)
     (org-habit-graph-column 80)
