@@ -4,6 +4,7 @@
 * TOC :TOC:
 - [[#setup][Setup]]
   - [[#setup-repository-in-org-file][Setup repository in org file]]
+  - [[#environment-setup][Environment Setup]]
   - [[#backups][Backups]]
   - [[#basic-setup][Basic setup]]
   - [[#line-numbers][Line Numbers]]
@@ -45,12 +46,12 @@
   - [[#dap-mode][Dap Mode]]
   - [[#treemacs][Treemacs]]
   - [[#lsp-ui][LSP UI]]
-  - [[#helm-lsp][Helm LSP]]
+  - [[#helm-lsp][helm LSP]]
   - [[#install-lsp-package][Install LSP Package]]
 - [[#programming-languages-and-tools][Programming Languages and Tools]]
   - [[#assembly][Assembly]]
   - [[#bash][Bash]]
-  - [[#c---todo][C++ --TODO]]
+  - [[#c---dbd][C++ --DBD]]
   - [[#ansii-colors][ANSII-Colors]]
   - [[#cmake][CMake]]
   - [[#java][Java]]
@@ -143,6 +144,13 @@ In the following code block, we will initialize package repositories and after t
    (use-package use-package-ensure-system-package :ensure t)
 
  #+END_SRC
+
+** Environment Setup
+In some operating systems Emacs does not load environment variables properly. Therefore, below we install a package called ~exec-path-from-shell~ and initialize it.
+ #+begin_src emacs-lisp
+ (use-package exec-path-from-shell :ensure t)
+ (exec-path-from-shell-initialize)
+ #+end_src
 ** Backups
 
 It is important to have file backups available with GNU Emacs. It is rare when I have to go back into backups and when I do, it is to go back to a previous backup of a buffer.
@@ -330,7 +338,7 @@ font installation.
       )
 
    (setq nyan-mode t)
-   (setq nyan-start-animation t)
+   (nyan-start-animation)
 #+END_SRC
 
 Since we do not do things by halves, it is also interesting to visually
@@ -791,6 +799,7 @@ seems to be easier and smoother to configure.
   (use-package company
     :after lsp-mode
     :hook (lsp-mode . company-mode)
+    :ensure t
     :custom
     (company-begin-commands '(self-insert-command))
     (company-idle-delay 0.5)
@@ -1146,8 +1155,8 @@ smartphone or other laptop), I synchronize my =.org= files with [[https://github
     (org-agenda-skip-deadline-if-done t)
     (org-agenda-skip-deadline-prewarning-if-scheduled 'pre-scheduled)
     (org-agenda-skip-scheduled-if-done t)
-    (org-agenda-span 2)
-    (org-agenda-start-on-weekday 6)
+    (org-agenda-span 14)
+    ;;(org-agenda-start-on-weekday 6)
     (org-agenda-start-with-log-mode t)
     (org-agenda-sticky nil)
     (org-agenda-tags-column 90)
@@ -1559,7 +1568,7 @@ LSP UI is used in various packages that require UI elements in LSP. E.g ~lsp-ui-
 
 Go through this [[https://github.com/emacs-lsp/lsp-ui/blob/master/lsp-ui-doc.el][link]]  to see what other parameters are provided.
 
-** Helm LSP
+** helm LSP
 Helm-lsp provides various functionality to work with the code. E.g Code actions like adding *getter, setter, toString*, refactoring etc. You can use ~helm-lsp-workspace-symbol~ to find various symbols (classes) within your workspace.
 
 LSP's built in symbol explorer uses ~xref-find-apropos~ to provide symbol navigation. Below we will replace that with helm version. After that you can use ~C-c l g a~ to find workspace symbols in a more intuitive way.
@@ -1578,31 +1587,36 @@ Let's install the main package for lsp. Here we will integrate lsp with which-ke
 #+begin_src emacs-lisp
 
 
-    (use-package lsp-mode
-        :ensure t
-        :hook (
-           (lsp-mode . lsp-enable-which-key-integration)
-           (java-mode . #'lsp-deferred)
-        )
-        :init (setq
-            lsp-keymap-prefix "C-c l"              ; this is for which-key integration documentation, need to use lsp-mode-map
-            lsp-enable-file-watchers nil
-            read-process-output-max (* 1024 1024)  ; 1 mb
-            lsp-completion-provider :capf
-            lsp-idle-delay 0.500
-        )
-        :config
-            (setq lsp-intelephense-multi-root nil) ; don't scan unnecessary projects
-            (with-eval-after-load 'lsp-intelephense
-            (setf (lsp--client-multi-root (gethash 'iph lsp-clients)) nil))
-            (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
-            ;; Performance tweaks, see
-            ;; https://github.com/emacs-lsp/lsp-mode#performance
-            (setq gc-cons-threshold 100000000)
-            (setq read-process-output-max (* 1024 1024)) ;; 1mb
-            (setq lsp-idle-delay 0.500)
-        )
+  (use-package lsp-mode
+      :ensure t
+      :hook (
+         (lsp-mode . lsp-enable-which-key-integration)
+         (java-mode . #'lsp-deferred)
+      )
+      :init (setq
+          lsp-keymap-prefix "C-c l"              ; this is for which-key integration documentation, need to use lsp-mode-map
+          lsp-enable-file-watchers nil
+          read-process-output-max (* 1024 1024)  ; 1 mb
+          lsp-completion-provider :capf
+          lsp-idle-delay 0.500
+      )
+      :config
+          (setq lsp-intelephense-multi-root nil) ; don't scan unnecessary projects
+          (with-eval-after-load 'lsp-intelephense
+          (setf (lsp--client-multi-root (gethash 'iph lsp-clients)) nil))
+          (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
+          ;; Performance tweaks, see
+          ;; https://github.com/emacs-lsp/lsp-mode#performance
+          (setq gc-cons-threshold 300000000)
+          (setq read-process-output-max (* 1024 1024)) ;; 1mb
+          (setq lsp-idle-delay 0.500)
+          (setq lsp-use-plists t)
+          (setq lsp-log-io nil)
+      )
 #+end_src
+
+#+RESULTS:
+| lsp-mode |
 
 You can start LSP server in a java project by using ~C-c l s s~. Once you type ~C-c l~ ~which-key~ package should guide you through rest of the options. In above setting I have added some memory management settings as suggested in [[https://emacs-lsp.github.io/lsp-mode/page/performance/][this guide]]. Change them to higher numbers, if you find *lsp-mode* sluggish in your computer.
 * Programming Languages and Tools
@@ -1637,7 +1651,7 @@ automatically granted to save a shell script file that begins with a =#!= sheban
     :hook (after-save . executable-make-buffer-file-executable-if-script-p))
 #+end_src
 
-** C++ --TODO
+** C++ --DBD
 When I develop in C++ with GNU Emacs, I use the [[https://github.com/MaskRay/ccls][ccls]] LSP server. To use it, do
 not forget to configure the LSP package and to install this LSP server through
 your system package manager.
@@ -1742,18 +1756,22 @@ Finally, to compile with CMake in C++, I use [[https://github.com/atilaneves/cma
 
 ** Java
 This is the package that handles server installation and session management.
+
+
+
 #+begin_src  emacs-lisp
   (use-package lsp-java
     :ensure t
     :init
-    (setq lsp-java-vmargs
-          (list
-           "-noverify"
-           "-Xmx3G"
-           "-XX:+UseG1GC"
-           "-XX:+UseStringDeduplication"
-           "-javaagent:/home/i/.lombok/lombok.jar"
-           )
+    (setq lsp-java-vmargs '("-XX:+UseParallelGC" "-XX:GCTimeRatio=4" "-XX:AdaptiveSizePolicyWeight=90" "-Dsun.zip.disableMemoryMapping=true" "-Xmx2G" "-Xms100m"))
+    (setq ;; lsp-java-vmargs
+          ;; (list
+          ;;  "-noverify"
+          ;;  "-Xmx3G"
+          ;;  "-XX:+UseG1GC"
+          ;;  "-XX:+UseStringDeduplication"
+          ;;  "-javaagent:/home/i/.lombok/lombok.jar"
+          ;;  )
           ;; Don't organise imports on save
           ;;lsp-java-save-action-organize-imports nil
 
@@ -1775,6 +1793,9 @@ This is the package that handles server installation and session management.
     )
 
 #+end_src
+
+#+RESULTS:
+: t
 
 *** Gradle
 #+begin_src emacs-lisp
