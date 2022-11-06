@@ -3853,7 +3853,7 @@ behavior.
 #+end_src
 * Emacs Client
 #+begin_src emacs-lisp
-(server-start)
+;;(server-start)
 #+end_src
 
 * Terminals
