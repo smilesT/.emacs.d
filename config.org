@@ -850,20 +850,50 @@ Here, we changed the delay for the consecutive key to be little higher than defa
 Helm allows for easy completion of commands. Below, we will replace several of the built in functions with helm versions and add keyboard shortcuts for couple of new useful commands.
 
 #+BEGIN_SRC emacs-lisp
-(use-package helm
-:ensure t
-:init
-(helm-mode 1)
-(progn (setq helm-buffers-fuzzy-matching t))
-:bind
-(("C-c h" . helm-command-prefix))
-(("M-x" . helm-M-x))
-(("C-x C-f" . helm-find-files))
-(("C-x b" . helm-buffers-list))
-(("C-c b" . helm-bookmarks))
-(("C-c f" . helm-recentf))   ;; Add new key to recentf
-(("C-c g" . helm-grep-do-git-grep)))  ;; Search using grep in a git project
+  (use-package helm
+  :ensure t
+  :init
+  (helm-mode 1)
+  (progn (setq helm-buffers-fuzzy-matching t
+
+    helm-recentf-fuzzy-match t
+
+    helm-mode-fuzzy-match t
+
+    helm-mini-fuzzy-match t
+
+    helm-M-x-fuzzy-match t
+
+    helm-etags-fuzzy-match t
+
+    helm-ff-fuzzy-matching t
+
+    helm-imenu-fuzzy-match t
+
+    helm-locate-fuzzy-match t
+
+    helm-apropos-fuzzy-match t
+
+    helm-session-fuzzy-match t
+
+    helm-locate-library-fuzzy-match t
+
+    helm-file-cache-fuzzy-match t
+
+    helm-completion-in-region-fuzzy-match t
+    ))
+  :bind
+  (("C-c h" . helm-command-prefix))
+  (("M-x" . helm-M-x))
+  (("C-x C-f" . helm-find-files))
+  (("C-x b" . helm-buffers-list))
+  (("C-c b" . helm-bookmarks))
+  (("C-c f" . helm-recentf))   ;; Add new key to recentf
+  (("C-c g" . helm-grep-do-git-grep)))  ;; Search using grep in a git project
 #+END_SRC
+
+#+RESULTS:
+: helm-grep-do-git-grep
 
 I want to point out, couple of interesting things from above setup. Just like we added ~C-c p~ as a prefix for projectile, here we added ~C-c h~ for helm. We also enabled fuzzy matching, so that your search text don't need to be very stict. Also, I added ~C-c g~ to helm-grep-do-git-grep. I can search files with specific text within a git project (make sure to commit it first).
 
@@ -3853,9 +3883,8 @@ behavior.
 #+end_src
 * Emacs Client
 #+begin_src emacs-lisp
-;;(server-start)
+(server-start)
 #+end_src
-
 * Terminals
 
 ** vterm
@@ -3866,12 +3895,26 @@ Make sure that you have the [[https://github.com/akermu/emacs-libvterm/#requirem
 
 #+begin_src emacs-lisp
 
-  (use-package vterm
+    ;; (use-package vterm
+    ;;   :commands vterm
+    ;;   :config
+    ;;   (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
+    ;;   ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
+    ;;   (setq vterm-max-scrollback 10000))
+
+
+    (use-package vterm
     :commands vterm
-    :config
-    (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
-    ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
-    (setq vterm-max-scrollback 10000))
+    :init
+    (defun project-vterm ()
+      (interactive)
+      (if (projectile-project-root)
+          (call-interactively #'projectile-run-vterm)
+        (call-interactively #'vterm)))
+    :custom
+    (vterm-environment '("TYPEWRITTEN_CURSOR=terminal"))
+    (vterm-ignore-blink-cursor t))
+
 
 #+end_src
 
@@ -3924,6 +3967,8 @@ For more thoughts on Eshell, check out these articles by Pierre Neidhardt:
       (setq eshell-visual-commands '("htop" "zsh" "vim")))
 
     (eshell-git-prompt-use-theme 'powerline))
+
+
 
 
 #+end_src
