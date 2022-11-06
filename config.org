@@ -56,8 +56,6 @@
   - [[#cmake][CMake]]
   - [[#java][Java]]
   - [[#csharp][CSharp]]
-  - [[#go---dbd][Go --DBD]]
-  - [[#rust---dbd][Rust --DBD]]
   - [[#csv][CSV]]
   - [[#r][R]]
   - [[#dockerfile][Dockerfile]]
@@ -310,6 +308,13 @@ font installation.
       (load-theme 'doom-tomorrow-night t)
       (doom-themes-org-config))
 
+
+  ;; doom-peacock
+  ;; doom-sourcerer
+  ;; doom-oceanic-next
+  ;; doom-Iosvkem
+  ;; doom-tomorrow-night
+
     (use-package doom-modeline
       :init (doom-modeline-mode)
       :custom
@@ -338,8 +343,11 @@ font installation.
       )
 
    (setq nyan-mode t)
-   (nyan-start-animation)
+   ;(nyan-start-animation)
 #+END_SRC
+
+#+RESULTS:
+: t
 
 Since we do not do things by halves, it is also interesting to visually
 differentiate "real" buffers (e.g., buffers that contain our work) from "unreal"
@@ -1845,19 +1853,7 @@ This is the package that handles server installation and session management.
     (advice-add 'gradle-build :after #'my/switch-to-compilation-window)
     (advice-add 'gradle-test :after #'my/switch-to-compilation-window))
 #+end_src
-*** Maven
-#+begin_src emacs-lisp
 
-
-  ;; (require 'pom)
-  ;; (let ((pom (pom-read-pom)))
-  ;;   (jde-project-file-version "1.0")
-  ;;   (jde-set-variables
-  ;;    '(jde-javadoc-gen-destination-directory "./target/docs/apidocs")
-  ;;    '(jde-project-name (pom-get-project-id pom))
-  ;;    '(jde-global-classpath (pom-get-classpath pom))))
-
-#+end_src
 ** CSharp
 
 #+begin_src emacs-lisp
@@ -1870,9 +1866,6 @@ This is the package that handles server installation and session management.
 (use-package csharp-mode
   :ensure t)
   #+end_src
-
-** Go --DBD
-** Rust --DBD
 
 ** CSV
 
@@ -3883,7 +3876,10 @@ behavior.
 #+end_src
 * Emacs Client
 #+begin_src emacs-lisp
-(server-start)
+;;systemctl --user start emacs.service   # Start emacs for the current session
+;;systemctl --user enable emacs.service  # Enable emacs to be started at login
+
+  (server-start)
 #+end_src
 * Terminals
 
@@ -3894,28 +3890,17 @@ behavior.
 Make sure that you have the [[https://github.com/akermu/emacs-libvterm/#requirements][necessary dependencies]] installed before trying to use =vterm= because there is a module that will need to be compiled before you can use it successfully.
 
 #+begin_src emacs-lisp
-
-    ;; (use-package vterm
-    ;;   :commands vterm
-    ;;   :config
-    ;;   (setq term-prompt-regexp "^[^#$%>\n]*[#$%>] *")  ;; Set this to match your custom shell prompt
-    ;;   ;;(setq vterm-shell "zsh")                       ;; Set this to customize the shell to launch
-    ;;   (setq vterm-max-scrollback 10000))
-
-
-    (use-package vterm
-    :commands vterm
-    :init
-    (defun project-vterm ()
-      (interactive)
-      (if (projectile-project-root)
-          (call-interactively #'projectile-run-vterm)
-        (call-interactively #'vterm)))
-    :custom
-    (vterm-environment '("TYPEWRITTEN_CURSOR=terminal"))
-    (vterm-ignore-blink-cursor t))
-
-
+  (use-package vterm
+      :commands vterm
+      :init
+      (defun project-vterm ()
+        (interactive)
+        (if (projectile-project-root)
+            (call-interactively #'projectile-run-vterm)
+          (call-interactively #'vterm)))
+      :custom
+      (vterm-environment '("TYPEWRITTEN_CURSOR=terminal"))
+      (vterm-ignore-blink-cursor t))
 #+end_src
 
 ** Eshell
