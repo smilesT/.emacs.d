@@ -1,5 +1,8 @@
 #!/bin/sh
 
+
+# tmpfs       /tmp        tmpfs       nodev,nosuid,size=16G    0   0
+
 if [ -z "$1" ];then
     echo "Usage:"
     echo "  emacs2ram start"
