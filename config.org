@@ -1645,11 +1645,11 @@ Let's install the main package for lsp. Here we will integrate lsp with which-ke
           (define-key lsp-mode-map (kbd "C-c l") lsp-command-map)
           ;; Performance tweaks, see
           ;; https://github.com/emacs-lsp/lsp-mode#performance
-          (setq gc-cons-threshold 300000000)
-          (setq read-process-output-max (* 1024 1024)) ;; 1mb
-          (setq lsp-idle-delay 0.500)
-          (setq lsp-use-plists t)
-          (setq lsp-log-io nil)
+          ;; (setq gc-cons-threshold 300000000)
+          ;; (setq read-process-output-max (* 1024 1024)) ;; 1mb
+          ;; (setq lsp-idle-delay 0.500)
+          ;; (setq lsp-use-plists t)
+          ;; (setq lsp-log-io nil)
       )
 #+end_src
 
@@ -3879,7 +3879,7 @@ behavior.
 ;;systemctl --user start emacs.service   # Start emacs for the current session
 ;;systemctl --user enable emacs.service  # Enable emacs to be started at login
 
-  (server-start)
+;  (server-start)
 #+end_src
 * Terminals
 
